@@ -17,7 +17,6 @@ import AgoraRTM from "agora-rtm-sdk";
 
 import {
     PhoneXMarkIcon,
-
     MapIcon,
     MapPinIcon,
     MicrophoneIcon,
@@ -26,7 +25,7 @@ import {
     VideoCameraSlashIcon,
 } from "@heroicons/react/24/solid";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 
 import {
@@ -54,7 +53,7 @@ function Call(props: { appId: string; channelName: any }) {
     const [locations, setLocations] = useState<{ [uid: string]: { lat: number; lng: number } }>({});
 
     const client = useRTCClient(
-        AgoraRTC.createClient({ codec: "vp8", mode: "live" })
+        AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })
     );
 
 
@@ -258,18 +257,17 @@ function Call(props: { appId: string; channelName: any }) {
                 <div className="flex flex-1 overflow-hidden">
 
                     <div className={`flex-1 ${isMapVisible ? "hidden" : ""} p-4`}>
-                        {
-                            rtcToken && <Videos
-                                channelName={props.channelName}
-                                AppID={props.appId}
-                                isMicMuted={isMicMuted}
-                                isCameraOff={isCameraOff}
-                                token={rtcToken}
-                                uid={uid}
-                            />
-                        }
-
-
+                        {/* {
+                            rtcToken && */}
+                        <Videos
+                            channelName={props.channelName}
+                            AppID={props.appId}
+                            isMicMuted={isMicMuted}
+                            isCameraOff={isCameraOff}
+                            token={rtcToken}
+                            uid={uid}
+                        />
+                        {/* } */}
                     </div>
                     <div className={`flex-1 ${isMapVisible ? "" : "hidden"} p-4`}>
                         <LoadScript googleMapsApiKey="AIzaSyCApGJh_JprBG8eDd_3_Gd3yKWI1y1iRgY">
@@ -379,12 +377,13 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
     const { isLoading: isLoadingCam, localCameraTrack } =
         useLocalCameraTrack();
     const remoteUsers = useRemoteUsers();
-    // console.log("Remote users:", remoteUsers);
+    console.log("Remote users:", remoteUsers);
     const { audioTracks } = useRemoteAudioTracks(remoteUsers);
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
+    const myUID = useMemo(() => Math.floor(Math.random() * 100000), []);
 
-    useJoin({ appid: AppID, channel: channelName, token: null, uid: 0 });
+    useJoin({ appid: AppID, channel: channelName, token: null, uid: myUID });
 
 
     useEffect(() => {
@@ -405,10 +404,11 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
 
     return (
         <div className="flex flex-wrap gap-4 justify-center items-center h-full">
-            {localCameraTrack && <LocalVideoTrack track={localCameraTrack} play />}
-            {remoteUsers.map((user) => (
-                <RemoteUser key={user.uid} user={user} />
-            ))}
+            {!isLoadingCam && localCameraTrack && <LocalVideoTrack track={localCameraTrack} play />}
+
+            {remoteUsers.map((user) => {
+                return <RemoteUser key={user.uid} user={user} />
+            })}
         </div>
     );
 }
