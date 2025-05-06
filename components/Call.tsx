@@ -47,7 +47,6 @@ function Call(props: { appId: string; channelName: any }) {
     const [messages, setMessages] = useState<{ uid: string; text: string }[]>([]);
     const [messageText, setMessageText] = useState("");
     const [rtcToken, setRtcToken] = useState(null);
-    const [uid, setUid] = useState(0);
 
     // New state for locations. We'll store the device’s latitude and longitude per user.
     const [locations, setLocations] = useState<{ [uid: string]: { lat: number; lng: number } }>({});
@@ -108,21 +107,16 @@ function Call(props: { appId: string; channelName: any }) {
         const init = async () => {
             try {
 
-                // const generatedUidRtm = `user_${Math.random().toString(36).substring(2, 12)}`;
+                const generatedUidRtm = String(`user_${Math.random().toString(36).substring(2, 12)}`);
 
-                // const [rtcToken, rtmToken] = await Promise.all([
-                //     getRTCToken(generatedUid),
-                //     getRTMToken(generatedUidRtm)
-                // ]);
-                // setRtcToken(rtcToken);
-
-                // console.log("Generated UID", generatedUid);
-                // console.log("Generated RTCtoken", rtcToken);
-                // console.log("Generated RTM token", rtmToken);
-
+                const [rtcToken, rtmToken] = await Promise.all([
+                    getRTCToken(generatedUid),
+                    getRTMToken(String(generatedUidRtm))
+                ]);
+                setRtcToken(rtcToken);
 
                 // const rtmClient = AgoraRTM.createInstance(props.appId);
-                // await rtmClient.login({ uid: generatedUid, token: rtmToken });
+                // await rtmClient.login({ uid: String(generatedUidRtm), token: rtmToken });
 
                 // const channel = await rtmClient.createChannel(props.channelName);
                 // await channel.join();
@@ -258,17 +252,17 @@ function Call(props: { appId: string; channelName: any }) {
                 <div className="flex flex-1 overflow-hidden">
 
                     <div className={`flex-1 ${isMapVisible ? "hidden" : ""} p-4`}>
-                        {/* {
-                            rtcToken && */}
-                        <Videos
-                            channelName={props.channelName}
-                            AppID={props.appId}
-                            isMicMuted={isMicMuted}
-                            isCameraOff={isCameraOff}
-                            token={rtcToken}
-                            uid={generatedUid}
-                        />
-                        {/* } */}
+                        {
+                            rtcToken &&
+                            <Videos
+                                channelName={props.channelName}
+                                AppID={props.appId}
+                                isMicMuted={isMicMuted}
+                                isCameraOff={isCameraOff}
+                                token={rtcToken}
+                                uid={generatedUid}
+                            />
+                        }
                     </div>
                     <div className={`flex-1 ${isMapVisible ? "" : "hidden"} p-4`}>
                         <LoadScript googleMapsApiKey="AIzaSyCApGJh_JprBG8eDd_3_Gd3yKWI1y1iRgY">
@@ -366,8 +360,8 @@ function Call(props: { appId: string; channelName: any }) {
                     </button>
                 </div>
 
-            </div>
-        </AgoraRTCProvider>
+            </div >
+        </AgoraRTCProvider >
     );
 }
 
@@ -384,7 +378,9 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
 
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
-    useJoin({ appid: AppID, channel: channelName, token: null, uid });
+    console.log(AppID, token, uid)
+    useJoin({ appid: AppID, channel: channelName, token, uid });
+    // useJoin({ appid: AppID, channel: channelName, token: '007eJxSYHhvF97Afyhsc8FGPitO2457saY3bSrmyalN21jra/uSpUqBwSwp0SAlxdjIJDkp1cTAINky0dg8LSU5KTExLdHU1NDA/ZVkRkMgI8O8xe9ZGBkYGVgYGBlAfCYwyQwmWcAkK0NaZlFxCQMDIAAA//85ByG5', uid });
 
 
     useEffect(() => {

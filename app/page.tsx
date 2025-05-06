@@ -9,8 +9,8 @@ export default function Home() {
       <h1
         className="mb-4 mt-20 text-4xl font-extrabold leading-none tracking-tight text-gray-900"
       >
-        <span className="text-black">NextJS</span> x <span className="text-blue-500"
-        >Agora</span>
+        <span className="text-black">Taskimony</span> <span className="text-blue-500"
+        >Video Call Module</span>
       </h1>
       <form onSubmit={(e) => {
         e.preventDefault()
@@ -41,7 +41,7 @@ export default function Home() {
         </div>
         <div className="text-center">
           <button
-            className="inline-flex items-center justify-center px-5 py-3 mt-5 text-base font-medium text-center text-white bg-blue-400 rounded-lg hover:bg-blue-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900"
+            className="inline-flex items-center justify-center px-5 py-3 mt-5 text-base font-medium text-center text-white bg-blue-400 rounded-lg hover:bg-blue-500 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 cursor-pointer"
           >Submit</button>
         </div>
       </form>
