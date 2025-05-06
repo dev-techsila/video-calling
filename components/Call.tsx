@@ -36,7 +36,7 @@ import {
     DirectionsRenderer
 } from "@react-google-maps/api";
 
-function Call(props: { appId: string; channelName: string }) {
+function Call(props: { appId: string; channelName: any }) {
     const [isMapVisible, setIsMapVisible] = useState(false);
     const [directions, setDirections] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
@@ -106,20 +106,19 @@ function Call(props: { appId: string; channelName: string }) {
 
         const init = async () => {
             try {
-                const generatedUid = String(Math.floor(Math.random() * 100000));
-                const generatedUidRtm = `user_${Math.random().toString(36).substring(2, 12)}`;
-                setUid(generatedUid);
+                // const generatedUid = String(Math.floor(Math.random() * 100000));
+                // const generatedUidRtm = `user_${Math.random().toString(36).substring(2, 12)}`;
+                // setUid(generatedUid);
 
-                const [rtcToken, rtmToken] = await Promise.all([
-                    getRTCToken(generatedUid),
-                    getRTMToken(generatedUidRtm)
-                ]);
-                setRtcToken(rtcToken);
+                // const [rtcToken, rtmToken] = await Promise.all([
+                //     getRTCToken(generatedUid),
+                //     getRTMToken(generatedUidRtm)
+                // ]);
+                // setRtcToken(rtcToken);
 
-
-                console.log("Generated UID", generatedUid);
-                console.log("Generated RTCtoken", rtcToken);
-                console.log("Generated RTM token", rtmToken);
+                // console.log("Generated UID", generatedUid);
+                // console.log("Generated RTCtoken", rtcToken);
+                // console.log("Generated RTM token", rtmToken);
 
 
                 // const rtmClient = AgoraRTM.createInstance(props.appId);
@@ -380,6 +379,7 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
     const { isLoading: isLoadingCam, localCameraTrack } =
         useLocalCameraTrack();
     const remoteUsers = useRemoteUsers();
+    // console.log("Remote users:", remoteUsers);
     const { audioTracks } = useRemoteAudioTracks(remoteUsers);
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
