@@ -47,7 +47,7 @@ function Call(props: { appId: string; channelName: any }) {
     const [messages, setMessages] = useState<{ uid: string; text: string }[]>([]);
     const [messageText, setMessageText] = useState("");
     const [rtcToken, setRtcToken] = useState(null);
-    const [uid, setUid] = useState('');
+    const [uid, setUid] = useState(0);
 
     // New state for locations. We'll store the device’s latitude and longitude per user.
     const [locations, setLocations] = useState<{ [uid: string]: { lat: number; lng: number } }>({});
@@ -96,6 +96,8 @@ function Call(props: { appId: string; channelName: any }) {
         }
     };
 
+    const generatedUid = useMemo(() => Math.floor(Math.random() * 100000), []);
+    // setUid(generatedUid);
 
     const initializedRef = useRef(false);
 
@@ -105,9 +107,8 @@ function Call(props: { appId: string; channelName: any }) {
 
         const init = async () => {
             try {
-                // const generatedUid = String(Math.floor(Math.random() * 100000));
+
                 // const generatedUidRtm = `user_${Math.random().toString(36).substring(2, 12)}`;
-                // setUid(generatedUid);
 
                 // const [rtcToken, rtmToken] = await Promise.all([
                 //     getRTCToken(generatedUid),
@@ -265,7 +266,7 @@ function Call(props: { appId: string; channelName: any }) {
                             isMicMuted={isMicMuted}
                             isCameraOff={isCameraOff}
                             token={rtcToken}
-                            uid={uid}
+                            uid={generatedUid}
                         />
                         {/* } */}
                     </div>
@@ -378,16 +379,19 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
         useLocalCameraTrack();
     const remoteUsers = useRemoteUsers();
     console.log("Remote users:", remoteUsers);
+
     const { audioTracks } = useRemoteAudioTracks(remoteUsers);
+
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
-    const myUID = useMemo(() => Math.floor(Math.random() * 100000), []);
-
-    useJoin({ appid: AppID, channel: channelName, token: null, uid: myUID });
+    useJoin({ appid: AppID, channel: channelName, token: null, uid });
 
 
     useEffect(() => {
         audioTracks.forEach((track) => track.play());
+        return () => {
+            audioTracks.forEach((track) => track.stop());
+        };
     }, [audioTracks]);
 
     useEffect(() => {
@@ -402,13 +406,32 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
         }
     }, [isCameraOff, localCameraTrack]);
 
-    return (
-        <div className="flex flex-wrap gap-4 justify-center items-center h-full">
-            {!isLoadingCam && localCameraTrack && <LocalVideoTrack track={localCameraTrack} play />}
+    const unit = "minmax(0, 1fr) ";
 
-            {remoteUsers.map((user) => {
-                return <RemoteUser key={user.uid} user={user} />
-            })}
+    return (
+        <div className="flex flex-col justify-between w-full h-screen p-1">
+            <div
+                className={`grid  gap-1 flex-1`}
+                style={{
+                    gridTemplateColumns:
+                        remoteUsers.length > 9
+                            ? unit.repeat(4)
+                            : remoteUsers.length > 4
+                                ? unit.repeat(3)
+                                : remoteUsers.length > 1
+                                    ? unit.repeat(2)
+                                    : unit,
+                }}
+            >
+                <LocalVideoTrack
+                    track={localCameraTrack}
+                    play={true}
+                    className="w-full h-full"
+                />
+                {remoteUsers.map((user) => (
+                    <RemoteUser key={user.uid} user={user} />
+                ))}
+            </div>
         </div>
     );
 }
