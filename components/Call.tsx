@@ -232,7 +232,7 @@ function Call(props: { appId: string; channelName: any }) {
         return data.token;
     }
 
-    async function getRTMToken(uid: String) {
+    async function getRTMToken(uid: string) {
         try {
             const res = await fetch('/api/rtm-token', {
                 method: 'POST',
