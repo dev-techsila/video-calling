@@ -95,8 +95,8 @@ function Call(props: { appId: string; channelName: any }) {
         }
     };
 
-    const generatedUid = useMemo(() => Math.floor(Math.random() * 100000), []);
-    // setUid(generatedUid);
+    const rtcUid = useMemo(() => Math.floor(Math.random() * 2032), []);
+    const rtmUid = useMemo(() => String(Math.floor(Math.random() * 2032)), [])
 
     const initializedRef = useRef(false);
 
@@ -106,41 +106,40 @@ function Call(props: { appId: string; channelName: any }) {
 
         const init = async () => {
             try {
-
-                const generatedUidRtm = String(`user_${Math.random().toString(36).substring(2, 12)}`);
-
                 const [rtcToken, rtmToken] = await Promise.all([
-                    getRTCToken(generatedUid),
-                    getRTMToken(String(generatedUidRtm))
+                    getRTCToken(rtcUid),
+                    getRTMToken(String(rtmUid))
                 ]);
                 setRtcToken(rtcToken);
 
-                // const rtmClient = AgoraRTM.createInstance(props.appId);
-                // await rtmClient.login({ uid: String(generatedUidRtm), token: rtmToken });
+                const rtmClient = AgoraRTM.createInstance(props.appId);
 
-                // const channel = await rtmClient.createChannel(props.channelName);
-                // await channel.join();
+                await rtmClient.login({ uid: String(rtmUid), token: rtmToken });
 
-                // channel.on("ChannelMessage", ({ text }, senderId) => {
+                const channel = await rtmClient.createChannel(props.channelName);
+                // console.log("channe:", channel)
+                await channel.join();
 
-                //     try {
-                //         if (text) {
-                //             const message = JSON.parse(text);
-                //             if (message.type === "location" && message.data) {
-                //                 setLocations((prev) => ({
-                //                     ...prev,
-                //                     [senderId]: message.data,
-                //                 }));
-                //             } else {
-                //                 setMessages((prev) => [...prev, { uid: senderId, text }]);
-                //             }
-                //         }
-                //     } catch {
-                //         if (text) {
-                //             setMessages((prev) => [...prev, { uid: senderId, text }]);
-                //         }
-                //     }
-                // });
+                channel.on("ChannelMessage", ({ text }, senderId) => {
+
+                    try {
+                        if (text) {
+                            const message = JSON.parse(text);
+                            if (message.type === "location" && message.data) {
+                                setLocations((prev) => ({
+                                    ...prev,
+                                    [senderId]: message.data,
+                                }));
+                            } else {
+                                setMessages((prev) => [...prev, { uid: senderId, text }]);
+                            }
+                        }
+                    } catch {
+                        if (text) {
+                            setMessages((prev) => [...prev, { uid: senderId, text }]);
+                        }
+                    }
+                });
 
                 // setChatClient(channel);
             } catch (err) {
@@ -150,15 +149,17 @@ function Call(props: { appId: string; channelName: any }) {
 
         init();
 
-        // return () => {
-        //     (async () => {
-        //         if (chatClient) {
-        //             await chatClient.leave();
-        //             await chatClient.client.logout();
-        //         }
-        //     })();
-        // };
+        return () => {
+            (async () => {
+
+                if (chatClient) {
+                    await chatClient.leave();
+                    await chatClient.client.logout();
+                }
+            })();
+        };
     }, []);
+
 
 
     // Watch own location and send location updates over the RTM channel.
@@ -208,13 +209,14 @@ function Call(props: { appId: string; channelName: any }) {
     // }, [chatClient]);
 
 
-    // const handleSendMessage = async () => {
-    //     if (chatClient && messageText.trim()) {
-    //         await chatClient.sendMessage({ text: messageText });
-    //         setMessages((prev) => [...prev, { uid: "Me", text: messageText }]);
-    //         setMessageText("");
-    //     }
-    // };
+    const handleSendMessage = async () => {
+        console.log(messageText)
+        if (chatClient && messageText.trim()) {
+            await chatClient.sendMessage({ text: messageText });
+            setMessages((prev) => [...prev, { uid: "Me", text: messageText }]);
+            setMessageText("");
+        }
+    };
 
     async function getRTCToken(uid: any) {
         const res = await fetch('/api/rtc-token', {
@@ -230,7 +232,7 @@ function Call(props: { appId: string; channelName: any }) {
         return data.token;
     }
 
-    async function getRTMToken(uid: string) {
+    async function getRTMToken(uid: String) {
         try {
             const res = await fetch('/api/rtm-token', {
                 method: 'POST',
@@ -260,7 +262,7 @@ function Call(props: { appId: string; channelName: any }) {
                                 isMicMuted={isMicMuted}
                                 isCameraOff={isCameraOff}
                                 token={rtcToken}
-                                uid={generatedUid}
+                                uid={rtcUid}
                             />
                         }
                     </div>
@@ -303,7 +305,7 @@ function Call(props: { appId: string; channelName: any }) {
                                 placeholder="Type a message"
                             />
                             <button
-                                // onClick={handleSendMessage}
+                                onClick={handleSendMessage}
                                 className="ml-2 px-3 py-1 bg-blue-600 rounded text-white hover:bg-blue-700"
                             >
                                 Send
@@ -378,9 +380,7 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
 
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
-    console.log(AppID, token, uid)
     useJoin({ appid: AppID, channel: channelName, token, uid });
-    // useJoin({ appid: AppID, channel: channelName, token: '007eJxSYHhvF97Afyhsc8FGPitO2457saY3bSrmyalN21jra/uSpUqBwSwp0SAlxdjIJDkp1cTAINky0dg8LSU5KTExLdHU1NDA/ZVkRkMgI8O8xe9ZGBkYGVgYGBlAfCYwyQwmWcAkK0NaZlFxCQMDIAAA//85ByG5', uid });
 
 
     useEffect(() => {
@@ -419,12 +419,13 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
                                     : unit,
                 }}
             >
-                <LocalVideoTrack
+                {<LocalVideoTrack
                     track={localCameraTrack}
                     play={true}
                     className="w-full h-full"
-                />
-                {remoteUsers.map((user) => (
+                />}
+
+                {remoteUsers?.map((user) => (
                     <RemoteUser key={user.uid} user={user} />
                 ))}
             </div>

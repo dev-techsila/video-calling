@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         const token = RtmTokenBuilder.buildToken(
             AGORA_APP_ID,
             AGORA_APP_CERTIFICATE,
-            uid,
+            uid.toString(),
             role,
             privilegeExpiredTs
         );
