@@ -43,7 +43,7 @@ function Call(props: { appId: string; channelName: any }) {
     const [sid, setSid] = useState<string | null>(null);
     const [isMicMuted, setIsMicMuted] = useState(false);
     const [isCameraOff, setIsCameraOff] = useState(false);
-    const [chatClient, setChatClient] = useState(null);
+    const [chatClient, setChatClient] = useState<any>(null);
     const [messages, setMessages] = useState<{ uid: string; text: string }[]>([]);
     const [messageText, setMessageText] = useState("");
     const [rtcToken, setRtcToken] = useState(null);
@@ -141,7 +141,7 @@ function Call(props: { appId: string; channelName: any }) {
                     }
                 });
 
-                // setChatClient(channel);
+                setChatClient(channel);
             } catch (err) {
                 console.error("Initialization failed", err);
             }
