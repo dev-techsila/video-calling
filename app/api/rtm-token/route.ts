@@ -4,8 +4,8 @@ import { RtmTokenBuilder, RtmRole } from 'agora-access-token';
 export async function POST(req: NextRequest) {
     const { uid } = await req.json();
 
-    const AGORA_APP_ID = process.env.PUBLIC_AGORA_APP_ID!;
-    const AGORA_APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE!;
+    const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!;
+    const AGORA_APP_CERTIFICATE = process.env.NEXT_AGORA_APP_CERTIFICATE!;
 
     if (!uid) {
         return NextResponse.json({ success: false, error: 'UID is required' }, { status: 400 });

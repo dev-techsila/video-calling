@@ -47,7 +47,6 @@ function Call(props: { appId: string; channelName: any }) {
     const [messages, setMessages] = useState<{ uid: string; text: string }[]>([]);
     const [messageText, setMessageText] = useState("");
     const [rtcToken, setRtcToken] = useState(null);
-    const [uid, setUid] = useState('');
 
     // New state for locations. We'll store the device’s latitude and longitude per user.
     const [locations, setLocations] = useState<{ [uid: string]: { lat: number; lng: number } }>({});
@@ -96,6 +95,8 @@ function Call(props: { appId: string; channelName: any }) {
         }
     };
 
+    const generatedUid = useMemo(() => Math.floor(Math.random() * 100000), []);
+    // setUid(generatedUid);
 
     const initializedRef = useRef(false);
 
@@ -105,23 +106,17 @@ function Call(props: { appId: string; channelName: any }) {
 
         const init = async () => {
             try {
-                // const generatedUid = String(Math.floor(Math.random() * 100000));
-                // const generatedUidRtm = `user_${Math.random().toString(36).substring(2, 12)}`;
-                // setUid(generatedUid);
 
-                // const [rtcToken, rtmToken] = await Promise.all([
-                //     getRTCToken(generatedUid),
-                //     getRTMToken(generatedUidRtm)
-                // ]);
-                // setRtcToken(rtcToken);
+                const generatedUidRtm = String(`user_${Math.random().toString(36).substring(2, 12)}`);
 
-                // console.log("Generated UID", generatedUid);
-                // console.log("Generated RTCtoken", rtcToken);
-                // console.log("Generated RTM token", rtmToken);
-
+                const [rtcToken, rtmToken] = await Promise.all([
+                    getRTCToken(generatedUid),
+                    getRTMToken(String(generatedUidRtm))
+                ]);
+                setRtcToken(rtcToken);
 
                 // const rtmClient = AgoraRTM.createInstance(props.appId);
-                // await rtmClient.login({ uid: generatedUid, token: rtmToken });
+                // await rtmClient.login({ uid: String(generatedUidRtm), token: rtmToken });
 
                 // const channel = await rtmClient.createChannel(props.channelName);
                 // await channel.join();
@@ -257,17 +252,17 @@ function Call(props: { appId: string; channelName: any }) {
                 <div className="flex flex-1 overflow-hidden">
 
                     <div className={`flex-1 ${isMapVisible ? "hidden" : ""} p-4`}>
-                        {/* {
-                            rtcToken && */}
-                        <Videos
-                            channelName={props.channelName}
-                            AppID={props.appId}
-                            isMicMuted={isMicMuted}
-                            isCameraOff={isCameraOff}
-                            token={rtcToken}
-                            uid={uid}
-                        />
-                        {/* } */}
+                        {
+                            rtcToken &&
+                            <Videos
+                                channelName={props.channelName}
+                                AppID={props.appId}
+                                isMicMuted={isMicMuted}
+                                isCameraOff={isCameraOff}
+                                token={rtcToken}
+                                uid={generatedUid}
+                            />
+                        }
                     </div>
                     <div className={`flex-1 ${isMapVisible ? "" : "hidden"} p-4`}>
                         <LoadScript googleMapsApiKey="AIzaSyCApGJh_JprBG8eDd_3_Gd3yKWI1y1iRgY">
@@ -365,8 +360,8 @@ function Call(props: { appId: string; channelName: any }) {
                     </button>
                 </div>
 
-            </div>
-        </AgoraRTCProvider>
+            </div >
+        </AgoraRTCProvider >
     );
 }
 
@@ -378,16 +373,21 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
         useLocalCameraTrack();
     const remoteUsers = useRemoteUsers();
     console.log("Remote users:", remoteUsers);
+
     const { audioTracks } = useRemoteAudioTracks(remoteUsers);
+
     usePublish([localMicrophoneTrack, localCameraTrack]);
 
-    const myUID = useMemo(() => Math.floor(Math.random() * 100000), []);
-
-    useJoin({ appid: AppID, channel: channelName, token: null, uid: myUID });
+    console.log(AppID, token, uid)
+    useJoin({ appid: AppID, channel: channelName, token, uid });
+    // useJoin({ appid: AppID, channel: channelName, token: '007eJxSYHhvF97Afyhsc8FGPitO2457saY3bSrmyalN21jra/uSpUqBwSwp0SAlxdjIJDkp1cTAINky0dg8LSU5KTExLdHU1NDA/ZVkRkMgI8O8xe9ZGBkYGVgYGBlAfCYwyQwmWcAkK0NaZlFxCQMDIAAA//85ByG5', uid });
 
 
     useEffect(() => {
         audioTracks.forEach((track) => track.play());
+        return () => {
+            audioTracks.forEach((track) => track.stop());
+        };
     }, [audioTracks]);
 
     useEffect(() => {
@@ -402,13 +402,32 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
         }
     }, [isCameraOff, localCameraTrack]);
 
-    return (
-        <div className="flex flex-wrap gap-4 justify-center items-center h-full">
-            {!isLoadingCam && localCameraTrack && <LocalVideoTrack track={localCameraTrack} play />}
+    const unit = "minmax(0, 1fr) ";
 
-            {remoteUsers.map((user) => {
-                return <RemoteUser key={user.uid} user={user} />
-            })}
+    return (
+        <div className="flex flex-col justify-between w-full h-screen p-1">
+            <div
+                className={`grid  gap-1 flex-1`}
+                style={{
+                    gridTemplateColumns:
+                        remoteUsers.length > 9
+                            ? unit.repeat(4)
+                            : remoteUsers.length > 4
+                                ? unit.repeat(3)
+                                : remoteUsers.length > 1
+                                    ? unit.repeat(2)
+                                    : unit,
+                }}
+            >
+                <LocalVideoTrack
+                    track={localCameraTrack}
+                    play={true}
+                    className="w-full h-full"
+                />
+                {remoteUsers.map((user) => (
+                    <RemoteUser key={user.uid} user={user} />
+                ))}
+            </div>
         </div>
     );
 }

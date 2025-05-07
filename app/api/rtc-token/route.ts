@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { uid, channelName } = body;
 
-    const AGORA_APP_ID = process.env.PUBLIC_AGORA_APP_ID!;
-    const AGORA_APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE!;
+    const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!;
+    const AGORA_APP_CERTIFICATE = process.env.NEXT_AGORA_APP_CERTIFICATE!;
 
     if (!uid) {
         return NextResponse.json({ success: false, error: 'UID is required' }, { status: 400 });
