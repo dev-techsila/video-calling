@@ -112,36 +112,36 @@ function Call(props: { appId: string; channelName: any }) {
                 ]);
                 setRtcToken(rtcToken);
 
-                const rtmClient = AgoraRTM.createInstance(props.appId);
+                // const rtmClient = AgoraRTM.createInstance(props.appId);
 
-                await rtmClient.login({ uid: String(rtmUid), token: rtmToken });
+                // await rtmClient.login({ uid: String(rtmUid), token: rtmToken });
 
-                const channel = await rtmClient.createChannel(props.channelName);
+                // const channel = await rtmClient.createChannel(props.channelName);
                 // console.log("channe:", channel)
-                await channel.join();
+                // await channel.join();
 
-                channel.on("ChannelMessage", ({ text }, senderId) => {
+                // channel.on("ChannelMessage", ({ text }, senderId) => {
 
-                    try {
-                        if (text) {
-                            const message = JSON.parse(text);
-                            if (message.type === "location" && message.data) {
-                                setLocations((prev) => ({
-                                    ...prev,
-                                    [senderId]: message.data,
-                                }));
-                            } else {
-                                setMessages((prev) => [...prev, { uid: senderId, text }]);
-                            }
-                        }
-                    } catch {
-                        if (text) {
-                            setMessages((prev) => [...prev, { uid: senderId, text }]);
-                        }
-                    }
-                });
+                //     try {
+                //         if (text) {
+                //             const message = JSON.parse(text);
+                //             if (message.type === "location" && message.data) {
+                //                 setLocations((prev) => ({
+                //                     ...prev,
+                //                     [senderId]: message.data,
+                //                 }));
+                //             } else {
+                //                 setMessages((prev) => [...prev, { uid: senderId, text }]);
+                //             }
+                //         }
+                //     } catch {
+                //         if (text) {
+                //             setMessages((prev) => [...prev, { uid: senderId, text }]);
+                //         }
+                //     }
+                // });
 
-                setChatClient(channel);
+                // setChatClient(channel);
             } catch (err) {
                 console.error("Initialization failed", err);
             }
@@ -149,17 +149,16 @@ function Call(props: { appId: string; channelName: any }) {
 
         init();
 
-        return () => {
-            (async () => {
-
-                if (chatClient) {
-                    await chatClient.leave();
-                    await chatClient.client.logout();
-                }
-            })();
-        };
+        // return () => {
+        //     (async () => {
+        //         console.log(chat)
+        //         if (chatClient) {
+        //             await chatClient.leave();
+        //             await chatClient.client.logout();
+        //         }
+        //     })();
+        // };
     }, []);
-
 
 
     // Watch own location and send location updates over the RTM channel.
@@ -419,7 +418,7 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
                                     : unit,
                 }}
             >
-                {<LocalVideoTrack
+                {localCameraTrack && <LocalVideoTrack
                     track={localCameraTrack}
                     play={true}
                     className="w-full h-full"
