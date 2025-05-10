@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
 export async function POST(req: NextRequest) {
-    const { channelName, resourceId, sid } = await req.json();
+    const { channelName, resourceId, sid, uid } = await req.json();
 
     try {
-        const AGORA_APP_ID = process.env.PUBLIC_AGORA_APP_ID!;
-        const AGORA_CUSTOMER_ID = process.env.AGORA_CUSTOMER_ID!;
-        const AGORA_CUSTOMER_SECRET = process.env.AGORA_CUSTOMER_SECRET!;
+        const AGORA_APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!;
+        const AGORA_CUSTOMER_ID = process.env.NEXT_AGORA_CUSTOMER_ID!;
+        const AGORA_CUSTOMER_SECRET = process.env.NEXT_AGORA_CUSTOMER_SECRET!;
 
         const authorization = Buffer.from(`${AGORA_CUSTOMER_ID}:${AGORA_CUSTOMER_SECRET}`).toString('base64');
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
             `https://api.agora.io/v1/apps/${AGORA_APP_ID}/cloud_recording/resourceid/${resourceId}/sid/${sid}/mode/mix/stop`,
             {
                 cname: channelName,
-                uid: "1000",
+                uid: String(uid),
                 clientRequest: {},
             },
             {
@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
         );
 
         return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        console.error(error.response);
         return NextResponse.json({ success: false, error: error }, { status: 500 });
     }
 }
