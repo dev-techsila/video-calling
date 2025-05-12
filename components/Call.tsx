@@ -34,6 +34,7 @@ import {
     Marker,
     DirectionsRenderer
 } from "@react-google-maps/api";
+import Chat from "./Chat";
 
 function Call(props: { appId: string; channelName: any }) {
     const [isMapVisible, setIsMapVisible] = useState(false);
@@ -44,8 +45,7 @@ function Call(props: { appId: string; channelName: any }) {
     const [isMicMuted, setIsMicMuted] = useState(false);
     const [isCameraOff, setIsCameraOff] = useState(false);
     const [chatClient, setChatClient] = useState<any>(null);
-    const [messages, setMessages] = useState<{ uid: string; text: string }[]>([]);
-    const [messageText, setMessageText] = useState("");
+    const [messages, setMessages] = useState<{ uid: string; text: string, time: number, isLocal: boolean }[]>([]);
     const [rtcToken, setRtcToken] = useState(null);
 
     // New state for locations. We'll store the device’s latitude and longitude per user.
@@ -123,7 +123,6 @@ function Call(props: { appId: string; channelName: any }) {
                 await channel.join();
 
                 channel.on("ChannelMessage", ({ text }, senderId) => {
-
                     try {
                         if (text) {
                             const message = JSON.parse(text);
@@ -133,12 +132,20 @@ function Call(props: { appId: string; channelName: any }) {
                                     [senderId]: message.data,
                                 }));
                             } else {
-                                setMessages((prev) => [...prev, { uid: senderId, text }]);
+                                setMessages((prev: any) => [...prev, {
+                                    uid: senderId,
+                                    text,
+                                    time: Date.now()
+                                }]);
                             }
                         }
                     } catch {
                         if (text) {
-                            setMessages((prev) => [...prev, { uid: senderId, text }]);
+                            setMessages((prev: any) => [...prev, {
+                                uid: senderId,
+                                text,
+                                time: Date.now()
+                            }]);
                         }
                     }
                 });
@@ -209,15 +216,6 @@ function Call(props: { appId: string; channelName: any }) {
     // }, [chatClient]);
 
 
-    const handleSendMessage = async () => {
-        console.log(messageText)
-        if (chatClient && messageText.trim()) {
-            await chatClient.sendMessage({ text: messageText });
-            setMessages((prev) => [...prev, { uid: "Me", text: messageText }]);
-            setMessageText("");
-        }
-    };
-
     async function getRTCToken(uid: any) {
         const res = await fetch('/api/rtc-token', {
             method: 'POST',
@@ -250,7 +248,7 @@ function Call(props: { appId: string; channelName: any }) {
 
     return (
         <AgoraRTCProvider client={client}>
-            <div className="flex flex-col h-screen bg-gray-800 relative">
+            <div className="flex flex-col h-[95vh] bg-gray-800 relative">
                 <div className="flex flex-1 overflow-hidden">
 
                     <div className={`flex-1 ${isMapVisible ? "hidden" : ""} p-4`}>
@@ -287,34 +285,11 @@ function Call(props: { appId: string; channelName: any }) {
                         </LoadScript>
 
                     </div>
-                    <div className="w-80 h-full bg-gray-900 bg-opacity-70 p-4 overflow-y-auto">
-                        <div className="text-white text-lg font-semibold mb-2">Chat</div>
-                        <div className="flex flex-col space-y-2 h-[80%] overflow-y-auto">
-                            {messages.map((msg, idx) => (
-                                <div key={idx} className="text-sm text-white">
-                                    <strong>{msg.uid}:</strong> {msg.text}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-2 flex">
-                            <input
-                                type="text"
-                                value={messageText}
-                                onChange={(e) => setMessageText(e.target.value)}
-                                className="flex-1 px-2 py-1 rounded bg-gray-700 text-white"
-                                placeholder="Type a message"
-                            />
-                            <button
-                                onClick={handleSendMessage}
-                                className="ml-2 px-3 py-1 bg-blue-600 rounded text-white hover:bg-blue-700"
-                            >
-                                Send
-                            </button>
-                        </div>
-                    </div>
+                    {/* Chat Section */}
+                    <Chat chatClient={chatClient} uid={rtcUid} messages={messages} setMessages={setMessages} />
                 </div>
 
-                <div className="fixed z-10 bottom-0 left-0 right-0 flex justify-center items-center gap-6 pb-4 bg-gray-900 bg-opacity-80">
+                <div className=" flex justify-center items-center gap-6 pb-4 bg-gray-900 bg-opacity-80">
                     <button
                         onClick={() => setIsMicMuted((prev) => !prev)}
                         className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition"
@@ -432,5 +407,6 @@ function Videos({ channelName, AppID, isMicMuted, isCameraOff, token, uid }: any
         </div>
     );
 }
+
 
 export default Call;
