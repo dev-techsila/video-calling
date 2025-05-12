@@ -101,7 +101,7 @@ const Chat = ({ chatClient, uid, messages, setMessages }: { chatClient: any; uid
             </div>
 
             {/* Input Area */}
-            <div className="sticky bottom-16 p-3 border-t border-gray-700 bg-gray-800">
+            <div className="sticky p-3 border-t border-gray-700 bg-gray-800">
                 <form
                     className="flex items-center"
                     onSubmit={(e) => {
