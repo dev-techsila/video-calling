@@ -36,7 +36,7 @@ import {
 } from "@react-google-maps/api";
 import Chat from "./Chat";
 
-function Call(props: { appId: string; channelName: any }) {
+function Call(props: { appId: string; channelName: any, ref: any }) {
     const [isMapVisible, setIsMapVisible] = useState(false);
     const [directions, setDirections] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
@@ -45,15 +45,13 @@ function Call(props: { appId: string; channelName: any }) {
     const [isMicMuted, setIsMicMuted] = useState(false);
     const [isCameraOff, setIsCameraOff] = useState(false);
     const [chatClient, setChatClient] = useState<any>(null);
+    const [client, setClient] = useState<any>(null);
     const [messages, setMessages] = useState<{ uid: string; text: string, time: number, isLocal: boolean }[]>([]);
     const [rtcToken, setRtcToken] = useState(null);
 
     // New state for locations. We'll store the device’s latitude and longitude per user.
     const [locations, setLocations] = useState<{ [uid: string]: { lat: number; lng: number } }>({});
 
-    const client = useRTCClient(
-        AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })
-    );
 
 
 
@@ -101,6 +99,11 @@ function Call(props: { appId: string; channelName: any }) {
     const rtmUid = useMemo(() => String(Math.floor(Math.random() * 2032)), [])
 
     const initializedRef = useRef(false);
+
+    useEffect(() => {
+        const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        setClient(client);
+    }, []);
 
     useEffect(() => {
         if (initializedRef.current) return;
@@ -321,7 +324,7 @@ function Call(props: { appId: string; channelName: any }) {
                     </button>
                     <a
                         className="p-3 bg-red-600 rounded-full hover:bg-red-700 transition"
-                        href="/"
+                        href={`https://taskimony.com/end-meeting/${props.ref}`}
                     >
                         <PhoneXMarkIcon className="h-6 w-6 text-white" />
                     </a>

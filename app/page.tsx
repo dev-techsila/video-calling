@@ -2,13 +2,17 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Call from '../components/Call';
+import dynamic from 'next/dynamic';
+
+const Call = dynamic(() => import('../components/Call'), {
+  ssr: false,
+});
 import { AlertCircle, CheckCircle, Loader2, Video, Lock } from 'lucide-react';
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const channelName = searchParams.get('channel');
-  const token = searchParams.get('token');
+  const channelName = searchParams.get('booking');
+  const token = searchParams.get('ref');
   const appId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
 
   const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
@@ -89,7 +93,7 @@ export default function Page() {
               No meeting channel was specified. Please check your meeting link and try again.
             </p>
             <a
-              href="/"
+              href="https://taskimony.com"
               className="px-4 py-2 font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Return to Home
@@ -133,7 +137,7 @@ export default function Page() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="/"
+                href="https://taskimony.com"
                 className="px-4 py-2 font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 Return to Home
@@ -172,6 +176,7 @@ export default function Page() {
       <Call
         appId={appId}
         channelName={channelName}
+        ref={token}
       />
     </main>
   );
