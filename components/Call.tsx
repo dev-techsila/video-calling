@@ -78,6 +78,7 @@ function Call(props: { appId: string; channelName: any }) {
         if (!isRecording) {
             const response = await axios.post("/api/start-recording", {
                 channelName: props.channelName,
+                uid: String(rtcUid)
             });
             const { resourceId, sid } = response.data;
             setResourceId(resourceId);
@@ -88,6 +89,7 @@ function Call(props: { appId: string; channelName: any }) {
                 channelName: props.channelName,
                 resourceId,
                 sid,
+                uid: String(rtcUid)
             });
             setIsRecording(false);
             setResourceId(null);
@@ -230,7 +232,7 @@ function Call(props: { appId: string; channelName: any }) {
         return data.token;
     }
 
-    async function getRTMToken(uid: String) {
+    async function getRTMToken(uid: string) {
         try {
             const res = await fetch('/api/rtm-token', {
                 method: 'POST',

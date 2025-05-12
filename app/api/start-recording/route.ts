@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
                 uid: String(uid),
                 clientRequest: {
                     recordingConfig: {
-                        maxIdleTime: 30,
+                        maxIdleTime: 300,
                         streamTypes: 2,
                         audioProfile: 1,
                         channelType: 0,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
                     },
                     storageConfig: {
                         vendor: 1, // 1: Amazon S3
-                        region: 3, // S3 region
+                        region: 0, // S3 region
                         bucket: process.env.NEXT_AWS_S3_BUCKET_NAME!,
                         accessKey: process.env.NEXT_AWS_S3_ACCESS_KEY!,
                         secretKey: process.env.NEXT_AWS_S3_SECRET_KEY!,
